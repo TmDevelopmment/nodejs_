@@ -2,8 +2,20 @@ const UserSchema = require('../model/UserSchema');
 const bcrypt = require('bcrypt');
 const {hash} = require("bcrypt");
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 const secret = process.env.SECRET;
+
+const transporter = nodemailer.createTransport({
+    host:process.env.EMAIL_HOST,
+    port:process.env.EMAIL_PORT,
+    secure:false,
+    auth:{
+        user:process.env.EMAIL_USER,
+        pass:process.env.EMAIL_PASS
+    }
+
+})
 
 const signup = async (req, res) => {
 
@@ -25,13 +37,25 @@ const signup = async (req, res) => {
             email: req.body.email,
             password: hash
         });
-        userSchema.save()
-            .then(result => res.status(201).json({
-                message: 'User created successfully',
-            }))
-            .catch((error) => {
-                return res.status(500).json({message: 'something went wrong', error: error});
-            });
+        await userSchema.save();
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: req.body.email,
+            subject: 'Account creation successful',
+            text: `account created successfully for ${req.body.fullName}`
+        }
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log(error)
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
+
+        res.status(201).json({message: 'User created successfully'});
+
     } catch (e) {
         return res.status(500).json({message: 'something went wrong', error: e});
     }
