@@ -13,6 +13,9 @@ const transporter = nodemailer.createTransport({
     auth:{
         user:process.env.EMAIL_USER,
         pass:process.env.EMAIL_PASS
+    },
+    tls:{
+        rejectUnauthorized:false
     }
 
 })
@@ -46,13 +49,13 @@ const signup = async (req, res) => {
             text: `account created successfully for ${req.body.fullName}`
         }
 
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log(error)
-            } else {
-                console.log('Email sent: ' + info.response);
-            }
-        });
+        // transporter.sendMail(mailOptions, (error, info) => {
+        //     if (error) {
+        //         console.log(error)
+        //     } else {
+        //         console.log('Email sent: ' + info.response);
+        //     }
+        // });
 
         res.status(201).json({message: 'User created successfully'});
 
