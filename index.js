@@ -21,17 +21,33 @@
  */
 
 const express = require('express');
-const CustomerRouter = require('./routes/CustomerRoute');
-const UserRouter = require('./routes/UserRoute');
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
+const passport = require('passport');
+const session = require('express-session');
+require('./middleware/PassportConfig');
 require ('dotenv').config();
 
 const serverPort = process.env.SERVER_PORT;
 
 console.log('Server port: ', serverPort);
 
+// ===================================================================
+const CustomerRouter = require('./routes/CustomerRoute');
+const UserRouter = require('./routes/UserRoute');
+// ===================================================================
+
 const app = express();
+
+// app.use(session({
+//     secret: process.env.SESSION_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: { secure: false }
+// }))
+
+app.use(passport.initialize());
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -47,3 +63,4 @@ app.get('/test', (req, res) => {
 
 app.use('api/v1/customers/',CustomerRouter);
 app.use('api/v1/users/',UserRouter);
+app.use('/auth'.require('./routes/AuthRoute'));
